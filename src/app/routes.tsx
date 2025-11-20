@@ -1,9 +1,10 @@
 import { createBrowserRouter } from 'react-router-dom';
+import App from './App';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <div>Home</div>,
+    element: <App />,
   },
   {
     path: '/:boxSlug',
