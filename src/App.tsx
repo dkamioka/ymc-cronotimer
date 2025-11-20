@@ -1,19 +1,8 @@
-import { useState } from 'react'
-
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <h1>Vite + React</h1>
-        <div className="card">
-          <button onClick={() => setCount((count) => count + 1)}>
-            count is {count}
-          </button>
-        </div>
-      </div>
-    </>
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+      <h1 className="text-4xl font-bold">YMC Cronotimer</h1>
+    </div>
   )
 }
 
