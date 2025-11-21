@@ -45,36 +45,38 @@ export function OnboardingPage() {
     setError(null)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      // Get the current session to ensure we're authenticated
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
-      if (!user) {
-        throw new Error('Not authenticated')
+      if (sessionError || !session) {
+        console.error('Session error:', sessionError)
+        throw new Error('Not authenticated - please log in again')
       }
+
+      const user = session.user
+      console.log('Creating box for user:', user.id, 'with session:', !!session.access_token)
 
       // Generate a unique slug
       const slug = boxName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + nanoid(6)
 
-      // Create the box
-      const { data: box, error: boxError } = await supabase
-        .from('boxes')
-        .insert({ name: boxName, slug } as any)
-        .select()
-        .single<{ id: string; name: string; slug: string }>()
+      console.log('Attempting to create box and user:', { boxName, slug, userName })
 
-      if (boxError) throw boxError
+      // Use the database function to create box and user atomically
+      // This bypasses RLS issues during onboarding
+      const { data, error } = await supabase.rpc('create_box_and_user', {
+        p_box_name: boxName,
+        p_box_slug: slug,
+        p_user_name: userName,
+        p_user_email: user.email!,
+        p_user_role: 'owner'
+      })
 
-      // Create the user profile
-      const { error: userError } = await supabase
-        .from('users')
-        .insert({
-          id: user.id,
-          email: user.email!,
-          name: userName,
-          box_id: box!.id,
-          role: 'owner'
-        } as any)
+      if (error) {
+        console.error('Onboarding function error:', error)
+        throw error
+      }
 
-      if (userError) throw userError
+      console.log('Box and user created successfully:', data)
 
       // Redirect to dashboard
       navigate(`/${slug}/dashboard`)
