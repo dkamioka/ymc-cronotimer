@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import { PageHeader } from '../../../shared/components/PageHeader'
 
 interface RemoteCommand {
   action: 'start' | 'pause' | 'resume' | 'skip' | 'previous'
@@ -37,13 +38,7 @@ export function RemoteControlPage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 p-6">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">Controle Remoto</h1>
-          <p className="text-gray-400">{slug}</p>
-        </div>
-      </div>
+      <PageHeader title="Controle Remoto" />
 
       <div className="max-w-2xl mx-auto p-6">
         {/* Connection Status */}

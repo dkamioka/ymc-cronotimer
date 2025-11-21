@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../../shared/utils/supabase'
+import { PageHeader } from '../../../shared/components/PageHeader'
 import { WorkoutLibrary } from './WorkoutLibrary'
 import { WorkoutCanvas } from './WorkoutCanvas'
 import { PropertiesPanel } from './PropertiesPanel'
@@ -101,8 +102,10 @@ export function WorkoutEditorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="h-screen flex">
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+      <PageHeader title="Editor de Treinos" />
+
+      <div className="flex-1 flex">
         {/* Left Sidebar - Library */}
         <div className="w-64 border-r border-gray-800 flex flex-col">
           <WorkoutLibrary

@@ -293,7 +293,6 @@ function ExerciseProperties({ exercise, section }: { exercise: Exercise; section
 }
 
 function RoundProperties({ round, exercise }: { round: Round; exercise: Exercise }) {
-  const [duration, setDuration] = useState(round.duration)
   const [mode, setMode] = useState(round.mode)
   const [excludeFromTotal, setExcludeFromTotal] = useState(round.exclude_from_total)
 
@@ -327,7 +326,6 @@ function RoundProperties({ round, exercise }: { round: Round; exercise: Exercise
     const m = parseInt(mins) || 0
     const s = parseInt(secs) || 0
     const formatted = `00:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-    setDuration(formatted)
     updateRound({ duration: formatted })
   }
 

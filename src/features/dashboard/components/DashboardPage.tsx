@@ -113,13 +113,22 @@ export function DashboardPage() {
                       onClick={() => navigate(`/${slug}/editor`)}
                       className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors"
                     >
-                      Editar Treino
+                      ✏️ Editar Treino
                     </button>
                     <button
-                      onClick={() => navigate(`/${slug}/tv/${todayWorkout.id}`)}
+                      onClick={() => {
+                        // Open in new tab/window for TV display
+                        window.open(`/${slug}/tv/${todayWorkout.id}`, '_blank')
+                      }}
                       className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-medium transition-colors"
                     >
-                      🖥️ Executar na TV
+                      🖥️ Abrir na TV
+                    </button>
+                    <button
+                      onClick={() => navigate(`/${slug}/remote`)}
+                      className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors"
+                    >
+                      📱 Controle Remoto
                     </button>
                   </div>
                 </div>

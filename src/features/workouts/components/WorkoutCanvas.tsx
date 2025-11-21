@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../../../shared/utils/supabase'
-import type { Workout, Section, Exercise } from '../types'
+import type { Workout, Section } from '../types'
 
 interface WorkoutCanvasProps {
   workout: Workout | null
@@ -98,6 +98,8 @@ export function WorkoutCanvas({
   }
 
   async function addExercise(sectionId: string) {
+    if (!workout) return
+
     try {
       const section = workout.sections?.find(s => s.id === sectionId)
       if (!section) return
@@ -139,6 +141,8 @@ export function WorkoutCanvas({
   }
 
   async function addRound(exerciseId: string) {
+    if (!workout) return
+
     try {
       const exercise = workout.sections
         ?.flatMap(s => s.exercises || [])
