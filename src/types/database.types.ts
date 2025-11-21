@@ -28,6 +28,7 @@ export interface Database {
           slug?: string
           created_at?: string
         }
+        Relationships: []
       }
       users: {
         Row: {
@@ -54,6 +55,14 @@ export interface Database {
           role?: 'owner' | 'coach' | 'athlete'
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "users_box_id_fkey"
+            columns: ["box_id"]
+            referencedRelation: "boxes"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       workouts: {
         Row: {
@@ -95,8 +104,24 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "workouts_box_id_fkey"
+            columns: ["box_id"]
+            referencedRelation: "boxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workouts_owner_id_fkey"
+            columns: ["owner_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
-      // More tables will be added as we create migrations
+    }
+    Views: {
+      [_ in never]: never
     }
     Functions: {
       create_box_and_user: {
@@ -109,6 +134,12 @@ export interface Database {
         }
         Returns: Json
       }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
