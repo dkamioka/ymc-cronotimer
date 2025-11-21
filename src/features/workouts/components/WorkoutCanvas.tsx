@@ -71,10 +71,10 @@ export function WorkoutCanvas({
       if (data) {
         const updated = {
           ...workout,
-          sections: [...(workout.sections || []), data]
+          sections: [...(workout.sections || []), data as any]
         }
-        onUpdateWorkout(updated)
-        onSelectSection(data)
+        onUpdateWorkout(updated as any)
+        onSelectSection(data as any)
       }
     } catch (error) {
       console.error('Error adding section:', error)

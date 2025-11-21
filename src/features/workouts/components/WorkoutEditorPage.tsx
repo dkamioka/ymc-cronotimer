@@ -19,6 +19,18 @@ export function WorkoutEditorPage() {
 
   async function loadWorkouts() {
     try {
+      // First get user's box_id
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('box_id')
+        .eq('id', user.id)
+        .single()
+
+      if (!userData) return
+
       const { data, error } = await supabase
         .from('workouts')
         .select(`
@@ -31,11 +43,11 @@ export function WorkoutEditorPage() {
             )
           )
         `)
-        .eq('boxes.slug', slug)
+        .eq('box_id', userData.box_id)
         .order('date', { ascending: false })
 
       if (error) throw error
-      setWorkouts(data || [])
+      setWorkouts((data as any) || [])
     } catch (error) {
       console.error('Error loading workouts:', error)
     } finally {
@@ -48,10 +60,19 @@ export function WorkoutEditorPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { data: userData } = await supabase
+        .from('users')
+        .select('box_id')
+        .eq('id', user.id)
+        .single()
+
+      if (!userData) return
+
       const today = new Date().toISOString().split('T')[0]
       const { data: workout, error } = await supabase
         .from('workouts')
         .insert({
+          box_id: userData.box_id,
           name: 'Novo Treino',
           slug: `workout-${Date.now()}`,
           date: today,
@@ -63,8 +84,8 @@ export function WorkoutEditorPage() {
 
       if (error) throw error
       if (workout) {
-        setWorkouts([workout, ...workouts])
-        setSelectedWorkout(workout)
+        setWorkouts([workout as any, ...workouts])
+        setSelectedWorkout(workout as any)
       }
     } catch (error) {
       console.error('Error creating workout:', error)
