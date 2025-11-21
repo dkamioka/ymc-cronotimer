@@ -83,7 +83,7 @@ export function DashboardPage() {
 
                   {todayWorkout.sections && todayWorkout.sections.length > 0 && (
                     <div className="space-y-3 mb-6">
-                      {todayWorkout.sections.map((section, idx) => (
+                      {todayWorkout.sections.map((section) => (
                         <div
                           key={section.id}
                           className="p-4 bg-gray-700/50 rounded-lg border border-gray-600"

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { supabase } from '../../../shared/utils/supabase'
 
 interface RemoteCommand {
   action: 'start' | 'pause' | 'resume' | 'skip' | 'previous'
@@ -10,7 +9,7 @@ interface RemoteCommand {
 export function RemoteControlPage() {
   const { slug } = useParams<{ slug: string }>()
   const [connected, setConnected] = useState(false)
-  const [currentWorkout, setCurrentWorkout] = useState<string | null>(null)
+  const [currentWorkout] = useState<string | null>(null)
   const [timerStatus, setTimerStatus] = useState<'idle' | 'running' | 'paused'>('idle')
 
   useEffect(() => {

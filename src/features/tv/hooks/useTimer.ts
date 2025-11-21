@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import type { Workout, Section, Exercise, Round, TimerState } from '../../workouts/types'
+import type { Workout, Round, TimerState } from '../../workouts/types'
 
 interface FlatRound {
   section: string

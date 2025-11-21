@@ -13,8 +13,6 @@ export function TVDisplayPage() {
   const {
     state,
     currentSection,
-    currentExercise,
-    currentRound,
     nextRound,
     displayTime,
     progress,
@@ -30,6 +28,8 @@ export function TVDisplayPage() {
   }, [workoutId])
 
   async function loadWorkout() {
+    if (!workoutId) return
+
     try {
       const { data, error } = await supabase
         .from('workouts')
@@ -47,7 +47,7 @@ export function TVDisplayPage() {
         .single()
 
       if (error) throw error
-      setWorkout(data)
+      setWorkout(data as any)
     } catch (error) {
       console.error('Error loading workout:', error)
     } finally {

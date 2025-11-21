@@ -54,6 +54,8 @@ export function WorkoutCanvas({
   }
 
   async function addSection() {
+    if (!workout) return
+
     try {
       const { data, error } = await supabase
         .from('sections')

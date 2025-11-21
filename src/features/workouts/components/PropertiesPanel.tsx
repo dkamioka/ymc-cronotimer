@@ -31,16 +31,18 @@ export function PropertiesPanel({ section, onUpdateSection }: PropertiesPanelPro
   }
 
   async function updateSection(updates: Partial<Section>) {
+    if (!section) return
+
     try {
       const { data, error } = await supabase
         .from('sections')
         .update(updates)
-        .eq('id', section.id)
         .select()
+        .eq('id', section.id)
         .single()
 
       if (error) throw error
-      if (data) onUpdateSection(data)
+      if (data) onUpdateSection(data as any)
     } catch (error) {
       console.error('Error updating section:', error)
     }
