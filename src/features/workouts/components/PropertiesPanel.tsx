@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../../shared/utils/supabase'
+import { useConfirmDialog } from '../../../shared/components/ConfirmDialog'
 import type { Section, Exercise, Round } from '../types'
 
 interface PropertiesPanelProps {
@@ -52,6 +53,7 @@ function SectionProperties({ section, onUpdate }: { section: Section; onUpdate: 
   const [color, setColor] = useState(section.color || '#FF6B35')
   const [repeatCount, setRepeatCount] = useState(section.repeat_count)
   const [excludeFromTotal, setExcludeFromTotal] = useState(section.exclude_from_total)
+  const { confirm, dialog } = useConfirmDialog()
 
   useEffect(() => {
     setName(section.name)
@@ -77,7 +79,14 @@ function SectionProperties({ section, onUpdate }: { section: Section; onUpdate: 
   }
 
   async function deleteSection() {
-    if (!confirm('Tem certeza que deseja excluir esta seção?')) return
+    const confirmed = await confirm({
+      title: 'Excluir Seção',
+      message: `Tem certeza que deseja excluir a seção "${section.name}"? Esta ação não pode ser desfeita.`,
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar'
+    })
+
+    if (!confirmed) return
 
     try {
       const { error } = await supabase
@@ -101,10 +110,12 @@ function SectionProperties({ section, onUpdate }: { section: Section; onUpdate: 
   ]
 
   return (
-    <div className="h-full bg-gray-800 flex flex-col">
-      <div className="p-6 border-b border-gray-700">
-        <h2 className="text-xl font-semibold">Seção</h2>
-      </div>
+    <>
+      {dialog}
+      <div className="h-full bg-gray-800 flex flex-col">
+        <div className="p-6 border-b border-gray-700">
+          <h2 className="text-xl font-semibold">Seção</h2>
+        </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Name */}
@@ -209,12 +220,14 @@ function SectionProperties({ section, onUpdate }: { section: Section; onUpdate: 
         </button>
       </div>
     </div>
+    </>
   )
 }
 
 function ExerciseProperties({ exercise, section }: { exercise: Exercise; section: Section }) {
   const [name, setName] = useState(exercise.name)
   const [notes, setNotes] = useState(exercise.notes || '')
+  const { confirm, dialog } = useConfirmDialog()
 
   async function updateExercise(updates: Partial<Exercise>) {
     try {
@@ -230,7 +243,14 @@ function ExerciseProperties({ exercise, section }: { exercise: Exercise; section
   }
 
   async function deleteExercise() {
-    if (!confirm('Excluir este exercício?')) return
+    const confirmed = await confirm({
+      title: 'Excluir Exercício',
+      message: `Tem certeza que deseja excluir o exercício "${exercise.name}"? Esta ação não pode ser desfeita.`,
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar'
+    })
+
+    if (!confirmed) return
 
     try {
       const { error } = await supabase
@@ -245,11 +265,13 @@ function ExerciseProperties({ exercise, section }: { exercise: Exercise; section
   }
 
   return (
-    <div className="h-full bg-gray-800 flex flex-col">
-      <div className="p-6 border-b border-gray-700">
-        <h2 className="text-xl font-semibold">Exercício</h2>
-        <p className="text-sm text-gray-400 mt-1">Seção: {section.name}</p>
-      </div>
+    <>
+      {dialog}
+      <div className="h-full bg-gray-800 flex flex-col">
+        <div className="p-6 border-b border-gray-700">
+          <h2 className="text-xl font-semibold">Exercício</h2>
+          <p className="text-sm text-gray-400 mt-1">Seção: {section.name}</p>
+        </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         <div>
@@ -289,11 +311,13 @@ function ExerciseProperties({ exercise, section }: { exercise: Exercise; section
         </button>
       </div>
     </div>
+    </>
   )
 }
 
 function RoundProperties({ round, exercise }: { round: Round; exercise: Exercise }) {
   const [mode, setMode] = useState(round.mode)
+  const { confirm, dialog } = useConfirmDialog()
   const [excludeFromTotal, setExcludeFromTotal] = useState(round.exclude_from_total)
 
   // Parse duration for easy editing
@@ -330,7 +354,14 @@ function RoundProperties({ round, exercise }: { round: Round; exercise: Exercise
   }
 
   async function deleteRound() {
-    if (!confirm('Excluir este round?')) return
+    const confirmed = await confirm({
+      title: 'Excluir Round',
+      message: 'Tem certeza que deseja excluir este round? Esta ação não pode ser desfeita.',
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar'
+    })
+
+    if (!confirmed) return
 
     try {
       const { error } = await supabase
@@ -345,11 +376,13 @@ function RoundProperties({ round, exercise }: { round: Round; exercise: Exercise
   }
 
   return (
-    <div className="h-full bg-gray-800 flex flex-col">
-      <div className="p-6 border-b border-gray-700">
-        <h2 className="text-xl font-semibold">Round</h2>
-        <p className="text-sm text-gray-400 mt-1">Exercício: {exercise.name}</p>
-      </div>
+    <>
+      {dialog}
+      <div className="h-full bg-gray-800 flex flex-col">
+        <div className="p-6 border-b border-gray-700">
+          <h2 className="text-xl font-semibold">Round</h2>
+          <p className="text-sm text-gray-400 mt-1">Exercício: {exercise.name}</p>
+        </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Duration */}
@@ -454,5 +487,6 @@ function RoundProperties({ round, exercise }: { round: Round; exercise: Exercise
         </button>
       </div>
     </div>
+    </>
   )
 }
