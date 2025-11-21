@@ -1,38 +1,15 @@
-import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { PageHeader } from '../../../shared/components/PageHeader'
-
-interface RemoteCommand {
-  action: 'start' | 'pause' | 'resume' | 'skip' | 'previous'
-  timestamp: number
-}
+import { useRemoteControl } from '../hooks/useRemoteControl'
 
 export function RemoteControlPage() {
   const { slug } = useParams<{ slug: string }>()
-  const [connected, setConnected] = useState(false)
-  const [currentWorkout] = useState<string | null>(null)
-  const [timerStatus, setTimerStatus] = useState<'idle' | 'running' | 'paused'>('idle')
+  const { connected, timerState, sendCommand } = useRemoteControl(slug || '')
 
-  useEffect(() => {
-    // TODO: Set up Supabase Realtime subscription for timer state
-    // This would listen to a 'timer_state' channel for the box
-    setConnected(true)
-  }, [slug])
-
-  async function sendCommand(action: RemoteCommand['action']) {
-    try {
-      // TODO: Send command via Supabase Realtime
-      // For now, just log it
-      console.log('Sending command:', action)
-
-      // Update local state optimistically
-      if (action === 'start' || action === 'resume') {
-        setTimerStatus('running')
-      } else if (action === 'pause') {
-        setTimerStatus('paused')
-      }
-    } catch (error) {
-      console.error('Error sending command:', error)
+  async function handleCommand(action: 'start' | 'pause' | 'resume' | 'skip' | 'previous') {
+    const success = await sendCommand(action)
+    if (!success) {
+      console.error('Failed to send command:', action)
     }
   }
 
@@ -59,16 +36,23 @@ export function RemoteControlPage() {
         </div>
 
         {/* Current Workout Info */}
-        {currentWorkout && (
+        {timerState && (
           <div className="bg-gray-800 rounded-lg p-6 mb-6 border border-gray-700">
             <h2 className="text-xl font-semibold mb-2">Treino Atual</h2>
-            <p className="text-gray-300">{currentWorkout}</p>
-            <div className="mt-4">
-              <div className="inline-block px-3 py-1 bg-blue-600 rounded text-sm">
-                {timerStatus === 'running' ? '▶ Executando' :
-                 timerStatus === 'paused' ? '⏸ Pausado' :
-                 '⏹ Parado'}
-              </div>
+            {timerState.current_section && (
+              <p className="text-gray-300 mb-2">
+                {timerState.current_section}
+                {timerState.current_exercise && ` - ${timerState.current_exercise}`}
+              </p>
+            )}
+            <div className="text-4xl font-mono font-bold mb-4">
+              {timerState.display_time}
+            </div>
+            <div className="inline-block px-3 py-1 bg-blue-600 rounded text-sm">
+              {timerState.state.status === 'running' ? '▶ Executando' :
+               timerState.state.status === 'paused' ? '⏸ Pausado' :
+               timerState.state.status === 'completed' ? '✓ Completo' :
+               '⏹ Parado'}
             </div>
           </div>
         )}
@@ -79,9 +63,9 @@ export function RemoteControlPage() {
 
           <div className="grid grid-cols-2 gap-4">
             {/* Start/Pause/Resume */}
-            {timerStatus === 'idle' && (
+            {(!timerState || timerState.state.status === 'idle') && (
               <button
-                onClick={() => sendCommand('start')}
+                onClick={() => handleCommand('start')}
                 disabled={!connected}
                 className="col-span-2 px-8 py-6 bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-xl text-2xl font-bold transition-colors"
               >
@@ -89,9 +73,9 @@ export function RemoteControlPage() {
               </button>
             )}
 
-            {timerStatus === 'running' && (
+            {timerState?.state.status === 'running' && (
               <button
-                onClick={() => sendCommand('pause')}
+                onClick={() => handleCommand('pause')}
                 disabled={!connected}
                 className="col-span-2 px-8 py-6 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-xl text-2xl font-bold transition-colors"
               >
@@ -99,9 +83,9 @@ export function RemoteControlPage() {
               </button>
             )}
 
-            {timerStatus === 'paused' && (
+            {timerState?.state.status === 'paused' && (
               <button
-                onClick={() => sendCommand('resume')}
+                onClick={() => handleCommand('resume')}
                 disabled={!connected}
                 className="col-span-2 px-8 py-6 bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-xl text-2xl font-bold transition-colors"
               >
@@ -111,7 +95,7 @@ export function RemoteControlPage() {
 
             {/* Previous */}
             <button
-              onClick={() => sendCommand('previous')}
+              onClick={() => handleCommand('previous')}
               disabled={!connected}
               className="px-6 py-6 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:cursor-not-allowed rounded-xl text-xl font-semibold transition-colors"
             >
@@ -120,7 +104,7 @@ export function RemoteControlPage() {
 
             {/* Skip */}
             <button
-              onClick={() => sendCommand('skip')}
+              onClick={() => handleCommand('skip')}
               disabled={!connected}
               className="px-6 py-6 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:cursor-not-allowed rounded-xl text-xl font-semibold transition-colors"
             >

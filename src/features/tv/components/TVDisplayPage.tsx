@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../../shared/utils/supabase'
 import { useTimer } from '../hooks/useTimer'
+import { useTimerBroadcast } from '../hooks/useTimerBroadcast'
 import type { Workout } from '../../workouts/types'
 
 export function TVDisplayPage() {
@@ -13,6 +14,7 @@ export function TVDisplayPage() {
   const {
     state,
     currentSection,
+    currentExercise,
     nextRound,
     displayTime,
     progress,
@@ -22,6 +24,35 @@ export function TVDisplayPage() {
     skip,
     previous
   } = useTimer(workout)
+
+  // Broadcast timer state to remote controls and receive commands
+  useTimerBroadcast({
+    boxSlug: slug || '',
+    workoutId: workoutId || '',
+    state,
+    currentSection,
+    currentExercise,
+    displayTime,
+    onCommand: (action) => {
+      switch (action) {
+        case 'start':
+          start()
+          break
+        case 'pause':
+          pause()
+          break
+        case 'resume':
+          resume()
+          break
+        case 'skip':
+          skip()
+          break
+        case 'previous':
+          previous()
+          break
+      }
+    }
+  })
 
   useEffect(() => {
     loadWorkout()
