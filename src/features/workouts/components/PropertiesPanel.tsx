@@ -47,6 +47,7 @@ export function PropertiesPanel({ section, onUpdateSection }: PropertiesPanelPro
   }
 
   async function deleteSection() {
+    if (!section) return
     if (!confirm('Tem certeza que deseja excluir esta seção?')) return
 
     try {

@@ -119,6 +119,154 @@ export interface Database {
           }
         ]
       }
+      sections: {
+        Row: {
+          id: string
+          workout_id: string
+          name: string
+          order: number
+          color: string | null
+          repeat_count: number
+          exclude_from_total: boolean
+        }
+        Insert: {
+          id?: string
+          workout_id: string
+          name: string
+          order: number
+          color?: string | null
+          repeat_count?: number
+          exclude_from_total?: boolean
+        }
+        Update: {
+          id?: string
+          workout_id?: string
+          name?: string
+          order?: number
+          color?: string | null
+          repeat_count?: number
+          exclude_from_total?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sections_workout_id_fkey"
+            columns: ["workout_id"]
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      exercises: {
+        Row: {
+          id: string
+          section_id: string
+          name: string
+          notes: string | null
+          order: number
+        }
+        Insert: {
+          id?: string
+          section_id: string
+          name: string
+          notes?: string | null
+          order: number
+        }
+        Update: {
+          id?: string
+          section_id?: string
+          name?: string
+          notes?: string | null
+          order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercises_section_id_fkey"
+            columns: ["section_id"]
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      rounds: {
+        Row: {
+          id: string
+          exercise_id: string
+          duration: string
+          mode: 'countup' | 'countdown'
+          color: string | null
+          exclude_from_total: boolean
+          order: number
+        }
+        Insert: {
+          id?: string
+          exercise_id: string
+          duration: string
+          mode: 'countup' | 'countdown'
+          color?: string | null
+          exclude_from_total?: boolean
+          order: number
+        }
+        Update: {
+          id?: string
+          exercise_id?: string
+          duration?: string
+          mode?: 'countup' | 'countdown'
+          color?: string | null
+          exclude_from_total?: boolean
+          order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rounds_exercise_id_fkey"
+            columns: ["exercise_id"]
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      execution_logs: {
+        Row: {
+          id: string
+          workout_id: string
+          round_id: string
+          planned_duration: string
+          actual_duration: string
+          started_at: string
+          ended_at: string
+        }
+        Insert: {
+          id?: string
+          workout_id: string
+          round_id: string
+          planned_duration: string
+          actual_duration: string
+          started_at: string
+          ended_at: string
+        }
+        Update: {
+          id?: string
+          workout_id?: string
+          round_id?: string
+          planned_duration?: string
+          actual_duration?: string
+          started_at?: string
+          ended_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "execution_logs_workout_id_fkey"
+            columns: ["workout_id"]
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "execution_logs_round_id_fkey"
+            columns: ["round_id"]
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
