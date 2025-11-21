@@ -6,6 +6,8 @@ import type { Section, Exercise, Round } from '../types'
 interface PropertiesPanelProps {
   section: Section | null
   onUpdateSection: (section: Section) => void
+  onDeleteSection?: () => void
+  onRefreshWorkout?: () => void
 }
 
 type SelectedItem =
@@ -14,7 +16,12 @@ type SelectedItem =
   | { type: 'round'; item: Round; exercise: Exercise; section: Section }
   | null
 
-export function PropertiesPanel({ section, onUpdateSection }: PropertiesPanelProps) {
+export function PropertiesPanel({
+  section,
+  onUpdateSection,
+  onDeleteSection,
+  onRefreshWorkout
+}: PropertiesPanelProps) {
   const [selected, setSelected] = useState<SelectedItem>(null)
 
   useEffect(() => {
@@ -34,21 +41,47 @@ export function PropertiesPanel({ section, onUpdateSection }: PropertiesPanelPro
   }
 
   if (selected.type === 'section') {
-    return <SectionProperties section={selected.item} onUpdate={onUpdateSection} />
+    return (
+      <SectionProperties
+        section={selected.item}
+        onUpdate={onUpdateSection}
+        onDelete={onDeleteSection}
+      />
+    )
   }
 
   if (selected.type === 'exercise') {
-    return <ExerciseProperties exercise={selected.item} section={selected.section} />
+    return (
+      <ExerciseProperties
+        exercise={selected.item}
+        section={selected.section}
+        onRefresh={onRefreshWorkout}
+      />
+    )
   }
 
   if (selected.type === 'round') {
-    return <RoundProperties round={selected.item} exercise={selected.exercise} />
+    return (
+      <RoundProperties
+        round={selected.item}
+        exercise={selected.exercise}
+        onRefresh={onRefreshWorkout}
+      />
+    )
   }
 
   return null
 }
 
-function SectionProperties({ section, onUpdate }: { section: Section; onUpdate: (s: Section) => void }) {
+function SectionProperties({
+  section,
+  onUpdate,
+  onDelete
+}: {
+  section: Section
+  onUpdate: (s: Section) => void
+  onDelete?: () => void
+}) {
   const [name, setName] = useState(section.name)
   const [color, setColor] = useState(section.color || '#FF6B35')
   const [repeatCount, setRepeatCount] = useState(section.repeat_count)
@@ -95,7 +128,11 @@ function SectionProperties({ section, onUpdate }: { section: Section; onUpdate: 
         .eq('id', section.id)
 
       if (error) throw error
-      // Parent will handle UI update
+
+      // Notify parent to refresh
+      if (onDelete) {
+        onDelete()
+      }
     } catch (error) {
       console.error('Error deleting section:', error)
     }
@@ -224,7 +261,15 @@ function SectionProperties({ section, onUpdate }: { section: Section; onUpdate: 
   )
 }
 
-function ExerciseProperties({ exercise, section }: { exercise: Exercise; section: Section }) {
+function ExerciseProperties({
+  exercise,
+  section,
+  onRefresh
+}: {
+  exercise: Exercise
+  section: Section
+  onRefresh?: () => void
+}) {
   const [name, setName] = useState(exercise.name)
   const [notes, setNotes] = useState(exercise.notes || '')
   const { confirm, dialog } = useConfirmDialog()
@@ -259,6 +304,11 @@ function ExerciseProperties({ exercise, section }: { exercise: Exercise; section
         .eq('id', exercise.id)
 
       if (error) throw error
+
+      // Notify parent to refresh
+      if (onRefresh) {
+        onRefresh()
+      }
     } catch (error) {
       console.error('Error deleting exercise:', error)
     }
@@ -315,7 +365,15 @@ function ExerciseProperties({ exercise, section }: { exercise: Exercise; section
   )
 }
 
-function RoundProperties({ round, exercise }: { round: Round; exercise: Exercise }) {
+function RoundProperties({
+  round,
+  exercise,
+  onRefresh
+}: {
+  round: Round
+  exercise: Exercise
+  onRefresh?: () => void
+}) {
   const [mode, setMode] = useState(round.mode)
   const { confirm, dialog } = useConfirmDialog()
   const [excludeFromTotal, setExcludeFromTotal] = useState(round.exclude_from_total)
@@ -370,6 +428,11 @@ function RoundProperties({ round, exercise }: { round: Round; exercise: Exercise
         .eq('id', round.id)
 
       if (error) throw error
+
+      // Notify parent to refresh
+      if (onRefresh) {
+        onRefresh()
+      }
     } catch (error) {
       console.error('Error deleting round:', error)
     }

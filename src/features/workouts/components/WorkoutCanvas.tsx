@@ -218,13 +218,27 @@ export function WorkoutCanvas({
             {workout.name}
           </h1>
         )}
-        <div className="flex items-center gap-4 mt-2 text-gray-400">
-          <span>{new Date(workout.date).toLocaleDateString('pt-BR')}</span>
-          {workout.is_template && (
-            <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded">
-              TEMPLATE
-            </span>
-          )}
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center gap-4 text-gray-400">
+            <span>{new Date(workout.date).toLocaleDateString('pt-BR')}</span>
+            {workout.is_template && (
+              <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded">
+                TEMPLATE
+              </span>
+            )}
+          </div>
+
+          {/* Save and Publish Button */}
+          <button
+            onClick={() => {
+              // Workout is already auto-saved, this is just for user feedback
+              alert('Treino salvo! Todas as alterações são salvas automaticamente.')
+            }}
+            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <span>✓</span>
+            <span>Salvo</span>
+          </button>
         </div>
       </div>
 

@@ -196,6 +196,36 @@ export function WorkoutEditorPage() {
     }
   }
 
+  async function refreshCurrentWorkout() {
+    if (!selectedWorkout) return
+
+    try {
+      const { data, error } = await supabase
+        .from('workouts')
+        .select(`
+          *,
+          sections (
+            *,
+            exercises (
+              *,
+              rounds (*)
+            )
+          )
+        `)
+        .eq('id', selectedWorkout.id)
+        .single()
+
+      if (error) throw error
+      if (data) {
+        const refreshed = data as any
+        setSelectedWorkout(refreshed)
+        setWorkouts(workouts.map(w => w.id === refreshed.id ? refreshed : w))
+      }
+    } catch (error) {
+      console.error('Error refreshing workout:', error)
+    }
+  }
+
   if (loading) {
     return <LoadingSpinner fullScreen size="xl" message="Carregando treinos..." />
   }
@@ -243,6 +273,15 @@ export function WorkoutEditorPage() {
                 )
               }
               setSelectedWorkout(updatedWorkout)
+            }}
+            onDeleteSection={async () => {
+              // Clear selection and refresh workout
+              setSelectedSection(null)
+              await refreshCurrentWorkout()
+            }}
+            onRefreshWorkout={async () => {
+              // Refresh current workout after exercise/round deletion
+              await refreshCurrentWorkout()
             }}
           />
         </div>
