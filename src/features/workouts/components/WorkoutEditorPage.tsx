@@ -94,6 +94,108 @@ export function WorkoutEditorPage() {
     }
   }
 
+  async function duplicateWorkout(workout: Workout) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('box_id')
+        .eq('id', user.id)
+        .single()
+
+      if (!userData) return
+
+      // Create new workout with same structure
+      const today = new Date().toISOString().split('T')[0]
+      const { data: newWorkout, error: workoutError } = await supabase
+        .from('workouts')
+        .insert({
+          box_id: userData.box_id,
+          name: `${workout.name} (Cópia)`,
+          slug: `workout-${Date.now()}`,
+          date: today,
+          owner_id: user.id,
+          is_template: false
+        })
+        .select()
+        .single()
+
+      if (workoutError) throw workoutError
+      if (!newWorkout) return
+
+      // Duplicate all sections, exercises, and rounds
+      if (workout.sections && workout.sections.length > 0) {
+        for (const section of workout.sections) {
+          const { data: newSection } = await supabase
+            .from('sections')
+            .insert({
+              workout_id: newWorkout.id,
+              name: section.name,
+              order: section.order,
+              color: section.color,
+              repeat_count: section.repeat_count,
+              exclude_from_total: section.exclude_from_total
+            })
+            .select()
+            .single()
+
+          if (newSection && section.exercises) {
+            for (const exercise of section.exercises) {
+              const { data: newExercise } = await supabase
+                .from('exercises')
+                .insert({
+                  section_id: newSection.id,
+                  name: exercise.name,
+                  order: exercise.order,
+                  notes: exercise.notes
+                })
+                .select()
+                .single()
+
+              if (newExercise && exercise.rounds) {
+                for (const round of exercise.rounds) {
+                  await supabase
+                    .from('rounds')
+                    .insert({
+                      exercise_id: newExercise.id,
+                      duration: round.duration,
+                      mode: round.mode,
+                      order: round.order,
+                      exclude_from_total: round.exclude_from_total,
+                      color: round.color
+                    })
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Reload workouts
+      await loadWorkouts()
+    } catch (error) {
+      console.error('Error duplicating workout:', error)
+    }
+  }
+
+  async function saveAsTemplate(workout: Workout) {
+    try {
+      const { error } = await supabase
+        .from('workouts')
+        .update({ is_template: true })
+        .eq('id', workout.id)
+
+      if (error) throw error
+
+      // Reload workouts to reflect template status
+      await loadWorkouts()
+    } catch (error) {
+      console.error('Error saving as template:', error)
+    }
+  }
+
   if (loading) {
     return <LoadingSpinner fullScreen size="xl" message="Carregando treinos..." />
   }
@@ -110,6 +212,8 @@ export function WorkoutEditorPage() {
             selectedWorkout={selectedWorkout}
             onSelectWorkout={setSelectedWorkout}
             onCreateWorkout={createNewWorkout}
+            onDuplicateWorkout={duplicateWorkout}
+            onSaveAsTemplate={saveAsTemplate}
           />
         </div>
 
