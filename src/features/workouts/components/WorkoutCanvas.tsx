@@ -17,6 +17,8 @@ export function WorkoutCanvas({
 }: WorkoutCanvasProps) {
   const [isEditingName, setIsEditingName] = useState(false)
   const [workoutName, setWorkoutName] = useState(workout?.name || '')
+  const [isEditingDate, setIsEditingDate] = useState(false)
+  const [workoutDate, setWorkoutDate] = useState(workout?.date || '')
 
   if (!workout) {
     return (
@@ -50,6 +52,28 @@ export function WorkoutCanvas({
       setIsEditingName(false)
     } catch (error) {
       console.error('Error updating workout name:', error)
+    }
+  }
+
+  async function updateWorkoutDate() {
+    if (!workout || workoutDate === workout.date) {
+      setIsEditingDate(false)
+      return
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('workouts')
+        .update({ date: workoutDate })
+        .eq('id', workout.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      if (data) onUpdateWorkout(data as any)
+      setIsEditingDate(false)
+    } catch (error) {
+      console.error('Error updating workout date:', error)
     }
   }
 
@@ -219,8 +243,41 @@ export function WorkoutCanvas({
           </h1>
         )}
         <div className="flex items-center justify-between mt-3">
-          <div className="flex items-center gap-4 text-gray-400">
-            <span>{new Date(workout.date).toLocaleDateString('pt-BR')}</span>
+          <div className="flex items-center gap-4">
+            {/* Date Selector */}
+            {isEditingDate ? (
+              <input
+                type="date"
+                value={workoutDate}
+                onChange={(e) => setWorkoutDate(e.target.value)}
+                onBlur={updateWorkoutDate}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') updateWorkoutDate()
+                  if (e.key === 'Escape') {
+                    setWorkoutDate(workout.date)
+                    setIsEditingDate(false)
+                  }
+                }}
+                className="px-3 py-1 bg-gray-800 border border-gray-700 rounded text-sm focus:outline-none focus:border-blue-500"
+                autoFocus
+              />
+            ) : (
+              <button
+                onClick={() => setIsEditingDate(true)}
+                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm transition-colors flex items-center gap-2"
+              >
+                <span>📅</span>
+                <span>{new Date(workout.date).toLocaleDateString('pt-BR')}</span>
+              </button>
+            )}
+
+            {/* Today indicator */}
+            {workout.date === new Date().toISOString().split('T')[0] && (
+              <span className="px-2 py-1 bg-green-600 text-white text-xs rounded font-medium">
+                HOJE
+              </span>
+            )}
+
             {workout.is_template && (
               <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded">
                 TEMPLATE
