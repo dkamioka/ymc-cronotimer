@@ -3,6 +3,10 @@ import { LoginPage } from '../features/auth/components/LoginPage';
 import { AuthCallback } from '../features/auth/components/AuthCallback';
 import { OnboardingPage } from '../features/auth/components/OnboardingPage';
 import { ProtectedRoute } from '../features/auth/components/ProtectedRoute';
+import { DashboardPage } from '../features/dashboard/components/DashboardPage';
+import { WorkoutEditorPage } from '../features/workouts/components/WorkoutEditorPage';
+import { TVDisplayPage } from '../features/tv/components/TVDisplayPage';
+import { RemoteControlPage } from '../features/remote/components/RemoteControlPage';
 
 export const router = createBrowserRouter([
   {
@@ -28,31 +32,31 @@ export const router = createBrowserRouter([
         path: 'dashboard',
         element: (
           <ProtectedRoute>
-            <div className="text-white p-8 min-h-screen bg-gray-900">Dashboard (coming soon)</div>
+            <DashboardPage />
           </ProtectedRoute>
         ),
       },
       {
-        path: 'editor/:workoutSlug?',
+        path: 'editor',
         element: (
           <ProtectedRoute requiredRole="coach">
-            <div className="text-white p-8 min-h-screen bg-gray-900">Editor (coming soon)</div>
+            <WorkoutEditorPage />
           </ProtectedRoute>
         ),
       },
       {
-        path: 'tv/:workoutSlug',
+        path: 'tv/:workoutId',
         element: (
           <ProtectedRoute>
-            <div className="text-white p-8 min-h-screen bg-gray-900">TV Mode (coming soon)</div>
+            <TVDisplayPage />
           </ProtectedRoute>
         ),
       },
       {
-        path: 'remote/:sessionCode',
+        path: 'remote',
         element: (
           <ProtectedRoute>
-            <div className="text-white p-8 min-h-screen bg-gray-900">Remote Control (coming soon)</div>
+            <RemoteControlPage />
           </ProtectedRoute>
         ),
       },
