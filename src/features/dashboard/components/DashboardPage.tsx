@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../../shared/utils/supabase'
+import { LoadingSpinner } from '../../../shared/components/LoadingSpinner'
 import type { Workout } from '../../workouts/types'
 
 export function DashboardPage() {
@@ -53,11 +54,7 @@ export function DashboardPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Carregando...</div>
-      </div>
-    )
+    return <LoadingSpinner fullScreen size="xl" message="Carregando dashboard..." />
   }
 
   return (

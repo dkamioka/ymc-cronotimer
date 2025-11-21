@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../../shared/utils/supabase'
 import { PageHeader } from '../../../shared/components/PageHeader'
+import { LoadingSpinner } from '../../../shared/components/LoadingSpinner'
 import { WorkoutLibrary } from './WorkoutLibrary'
 import { WorkoutCanvas } from './WorkoutCanvas'
 import { PropertiesPanel } from './PropertiesPanel'
@@ -94,11 +95,7 @@ export function WorkoutEditorPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Carregando...</div>
-      </div>
-    )
+    return <LoadingSpinner fullScreen size="xl" message="Carregando treinos..." />
   }
 
   return (

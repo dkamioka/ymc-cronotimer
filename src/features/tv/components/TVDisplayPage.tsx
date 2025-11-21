@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../../shared/utils/supabase'
+import { LoadingSpinner } from '../../../shared/components/LoadingSpinner'
 import { useTimer } from '../hooks/useTimer'
 import { useTimerBroadcast } from '../hooks/useTimerBroadcast'
 import type { Workout } from '../../workouts/types'
@@ -87,17 +88,19 @@ export function TVDisplayPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-4xl">Carregando...</div>
-      </div>
-    )
+    return <LoadingSpinner fullScreen size="xl" message="Carregando treino..." />
   }
 
   if (!workout) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-4xl">Treino não encontrado</div>
+        <div className="text-center">
+          <div className="text-6xl mb-6">⚠️</div>
+          <div className="text-white text-3xl mb-4">Treino não encontrado</div>
+          <a href="/" className="text-blue-400 hover:underline text-xl">
+            Voltar ao início
+          </a>
+        </div>
       </div>
     )
   }
