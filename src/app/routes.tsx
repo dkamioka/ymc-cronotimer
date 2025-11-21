@@ -1,29 +1,50 @@
 import { createBrowserRouter } from 'react-router-dom';
-import App from './App';
+import { LoginPage } from '../features/auth/components/LoginPage';
+import { ProtectedRoute } from '../features/auth/components/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <LoginPage />,
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
   },
   {
     path: '/:boxSlug',
     children: [
       {
         path: 'dashboard',
-        element: <div>Dashboard</div>,
+        element: (
+          <ProtectedRoute>
+            <div className="text-white p-8 min-h-screen bg-gray-900">Dashboard (coming soon)</div>
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'editor/:workoutSlug?',
-        element: <div>Editor</div>,
+        element: (
+          <ProtectedRoute requiredRole="coach">
+            <div className="text-white p-8 min-h-screen bg-gray-900">Editor (coming soon)</div>
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'tv/:workoutSlug',
-        element: <div>TV Mode</div>,
+        element: (
+          <ProtectedRoute>
+            <div className="text-white p-8 min-h-screen bg-gray-900">TV Mode (coming soon)</div>
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'remote/:sessionCode',
-        element: <div>Remote Control</div>,
+        element: (
+          <ProtectedRoute>
+            <div className="text-white p-8 min-h-screen bg-gray-900">Remote Control (coming soon)</div>
+          </ProtectedRoute>
+        ),
       },
     ],
   },
