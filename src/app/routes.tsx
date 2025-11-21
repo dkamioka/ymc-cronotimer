@@ -1,5 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { LoginPage } from '../features/auth/components/LoginPage';
+import { AuthCallback } from '../features/auth/components/AuthCallback';
+import { OnboardingPage } from '../features/auth/components/OnboardingPage';
 import { ProtectedRoute } from '../features/auth/components/ProtectedRoute';
 
 export const router = createBrowserRouter([
@@ -10,6 +12,14 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/auth/callback',
+    element: <AuthCallback />,
+  },
+  {
+    path: '/onboarding',
+    element: <OnboardingPage />,
   },
   {
     path: '/:boxSlug',
