@@ -98,5 +98,17 @@ export interface Database {
       }
       // More tables will be added as we create migrations
     }
+    Functions: {
+      create_box_and_user: {
+        Args: {
+          p_box_name: string
+          p_box_slug: string
+          p_user_name: string
+          p_user_email: string
+          p_user_role?: string
+        }
+        Returns: Json
+      }
+    }
   }
 }
