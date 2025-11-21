@@ -55,6 +55,47 @@ export interface Database {
           created_at?: string
         }
       }
+      workouts: {
+        Row: {
+          id: string
+          box_id: string
+          owner_id: string
+          slug: string
+          name: string
+          date: string
+          tags: string[] | null
+          is_template: boolean
+          total_duration: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          box_id: string
+          owner_id: string
+          slug: string
+          name: string
+          date: string
+          tags?: string[] | null
+          is_template?: boolean
+          total_duration?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          box_id?: string
+          owner_id?: string
+          slug?: string
+          name?: string
+          date?: string
+          tags?: string[] | null
+          is_template?: boolean
+          total_duration?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       // More tables will be added as we create migrations
     }
   }
