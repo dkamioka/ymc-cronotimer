@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../../shared/utils/supabase'
 
@@ -9,6 +9,33 @@ export function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
+
+  // Check if user is already logged in
+  useEffect(() => {
+    console.log('[LoginPage] Checking for existing session')
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        console.log('[LoginPage] User already logged in, redirecting...', session.user.id)
+
+        // Fetch user's box to redirect to dashboard
+        const { data: userData } = await supabase
+          .from('users')
+          .select('box_id, boxes(slug)')
+          .eq('id', session.user.id)
+          .single<{ box_id: string; boxes: { slug: string } | null }>()
+
+        if (userData?.boxes) {
+          console.log('[LoginPage] Redirecting to dashboard:', userData.boxes.slug)
+          navigate(`/${userData.boxes.slug}/dashboard`)
+        } else {
+          console.log('[LoginPage] No box found, redirecting to onboarding')
+          navigate('/onboarding')
+        }
+      } else {
+        console.log('[LoginPage] No existing session found')
+      }
+    })
+  }, [])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
