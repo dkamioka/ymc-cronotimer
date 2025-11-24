@@ -12,11 +12,8 @@ export function LoginPage() {
 
   // Check if user is already logged in
   useEffect(() => {
-    console.log('[LoginPage] Checking for existing session')
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        console.log('[LoginPage] User already logged in, redirecting...', session.user.id)
-
         // Fetch user's box to redirect to dashboard
         const { data: userData } = await supabase
           .from('users')
@@ -25,14 +22,10 @@ export function LoginPage() {
           .single<{ box_id: string; boxes: { slug: string } | null }>()
 
         if (userData?.boxes) {
-          console.log('[LoginPage] Redirecting to dashboard:', userData.boxes.slug)
           navigate(`/${userData.boxes.slug}/dashboard`)
         } else {
-          console.log('[LoginPage] No box found, redirecting to onboarding')
           navigate('/onboarding')
         }
-      } else {
-        console.log('[LoginPage] No existing session found')
       }
     })
   }, [])
@@ -73,26 +66,17 @@ export function LoginPage() {
     setGoogleLoading(true)
     setError(null)
 
-    console.log('[LoginPage] Starting Google OAuth')
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
-        skipBrowserRedirect: false, // Ensure we redirect, not popup
       },
     })
 
-    console.log('[LoginPage] OAuth response:', { data, error })
-
     if (error) {
-      console.error('[LoginPage] OAuth error:', error)
       setError(error.message)
       setGoogleLoading(false)
     }
-
-    // Note: If redirect is successful, this code won't execute
-    // because the page will navigate away
   }
 
   return (
