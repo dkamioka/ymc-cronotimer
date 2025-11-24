@@ -6,13 +6,19 @@ import { LoadingSpinner } from '../../../shared/components/LoadingSpinner'
 import { WorkoutLibrary } from './WorkoutLibrary'
 import { WorkoutCanvas } from './WorkoutCanvas'
 import { PropertiesPanel } from './PropertiesPanel'
-import type { Workout, Section } from '../types'
+import type { Workout, Section, Exercise, Round } from '../types'
+
+type SelectedItem =
+  | { type: 'section'; item: Section }
+  | { type: 'exercise'; item: Exercise }
+  | { type: 'round'; item: Round }
+  | null
 
 export function WorkoutEditorPage() {
   const { slug } = useParams<{ slug: string }>()
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null)
-  const [selectedSection, setSelectedSection] = useState<Section | null>(null)
+  const [selectedItem, setSelectedItem] = useState<SelectedItem>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -251,8 +257,8 @@ export function WorkoutEditorPage() {
         <div className="flex-1 flex flex-col">
           <WorkoutCanvas
             workout={selectedWorkout}
-            selectedSection={selectedSection}
-            onSelectSection={setSelectedSection}
+            selectedItem={selectedItem}
+            onSelectItem={setSelectedItem}
             onUpdateWorkout={(updated) => {
               setWorkouts(workouts.map(w => w.id === updated.id ? updated : w))
               setSelectedWorkout(updated)
@@ -263,24 +269,10 @@ export function WorkoutEditorPage() {
         {/* Right Sidebar - Properties */}
         <div className="w-80 border-l border-gray-800">
           <PropertiesPanel
-            section={selectedSection}
-            onUpdateSection={(updated) => {
-              if (!selectedWorkout) return
-              const updatedWorkout = {
-                ...selectedWorkout,
-                sections: selectedWorkout.sections?.map(s =>
-                  s.id === updated.id ? updated : s
-                )
-              }
-              setSelectedWorkout(updatedWorkout)
-            }}
-            onDeleteSection={async () => {
-              // Clear selection and refresh workout
-              setSelectedSection(null)
-              await refreshCurrentWorkout()
-            }}
+            selectedItem={selectedItem}
+            onClearSelection={() => setSelectedItem(null)}
             onRefreshWorkout={async () => {
-              // Refresh current workout after exercise/round deletion
+              // Refresh current workout after any change
               await refreshCurrentWorkout()
             }}
           />

@@ -1,18 +1,24 @@
 import { useState } from 'react'
 import { supabase } from '../../../shared/utils/supabase'
-import type { Workout, Section } from '../types'
+import type { Workout, Section, Exercise, Round } from '../types'
+
+type SelectedItem =
+  | { type: 'section'; item: Section }
+  | { type: 'exercise'; item: Exercise }
+  | { type: 'round'; item: Round }
+  | null
 
 interface WorkoutCanvasProps {
   workout: Workout | null
-  selectedSection: Section | null
-  onSelectSection: (section: Section | null) => void
+  selectedItem: SelectedItem
+  onSelectItem: (item: SelectedItem) => void
   onUpdateWorkout: (workout: Workout) => void
 }
 
 export function WorkoutCanvas({
   workout,
-  selectedSection,
-  onSelectSection,
+  selectedItem,
+  onSelectItem,
   onUpdateWorkout
 }: WorkoutCanvasProps) {
   const [isEditingName, setIsEditingName] = useState(false)
@@ -285,17 +291,11 @@ export function WorkoutCanvas({
             )}
           </div>
 
-          {/* Save and Publish Button */}
-          <button
-            onClick={() => {
-              // Workout is already auto-saved, this is just for user feedback
-              alert('Treino salvo! Todas as alterações são salvas automaticamente.')
-            }}
-            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-          >
-            <span>✓</span>
-            <span>Salvo</span>
-          </button>
+          {/* Auto-save indicator */}
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg border border-gray-700">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm text-gray-300">Salvamento automático ativo</span>
+          </div>
         </div>
       </div>
 
@@ -311,14 +311,14 @@ export function WorkoutCanvas({
             {workout.sections.map((section) => (
               <div key={section.id} className="space-y-2">
                 <div
-                  onClick={() => onSelectSection(section)}
+                  onClick={() => onSelectItem({ type: 'section', item: section })}
                   className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    selectedSection?.id === section.id
+                    selectedItem?.type === 'section' && selectedItem.item.id === section.id
                       ? 'border-blue-500 bg-blue-500/10'
                       : 'border-gray-700 hover:border-gray-600'
                   }`}
                   style={{
-                    backgroundColor: selectedSection?.id === section.id
+                    backgroundColor: selectedItem?.type === 'section' && selectedItem.item.id === section.id
                       ? undefined
                       : `${section.color}15`
                   }}
@@ -350,7 +350,18 @@ export function WorkoutCanvas({
                   {section.exercises && section.exercises.length > 0 && (
                     <div className="space-y-2 pl-6">
                       {section.exercises.map((exercise) => (
-                        <div key={exercise.id} className="bg-gray-800/50 rounded p-3">
+                        <div
+                          key={exercise.id}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onSelectItem({ type: 'exercise', item: exercise })
+                          }}
+                          className={`rounded p-3 cursor-pointer transition-all border-2 ${
+                            selectedItem?.type === 'exercise' && selectedItem.item.id === exercise.id
+                              ? 'bg-blue-500/20 border-blue-500'
+                              : 'bg-gray-800/50 border-transparent hover:border-gray-600'
+                          }`}
+                        >
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-medium">{exercise.name}</span>
                             <button
@@ -364,9 +375,20 @@ export function WorkoutCanvas({
                             </button>
                           </div>
                           {exercise.rounds && exercise.rounds.length > 0 && (
-                            <div className="space-y-1 pl-4 text-sm text-gray-400">
+                            <div className="space-y-1 pl-4 text-sm">
                               {exercise.rounds.map((round) => (
-                                <div key={round.id} className="flex items-center gap-2">
+                                <div
+                                  key={round.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    onSelectItem({ type: 'round', item: round })
+                                  }}
+                                  className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer transition-all border ${
+                                    selectedItem?.type === 'round' && selectedItem.item.id === round.id
+                                      ? 'bg-blue-500/30 border-blue-500 text-white'
+                                      : 'border-transparent text-gray-400 hover:bg-gray-700/50 hover:border-gray-600'
+                                  }`}
+                                >
                                   <span>{round.mode === 'countdown' ? '↓' : '↑'}</span>
                                   <span>{formatDuration(round.duration)}</span>
                                 </div>

@@ -3,36 +3,24 @@ import { supabase } from '../../../shared/utils/supabase'
 import { useConfirmDialog } from '../../../shared/components/ConfirmDialog'
 import type { Section, Exercise, Round } from '../types'
 
+type SelectedItem =
+  | { type: 'section'; item: Section }
+  | { type: 'exercise'; item: Exercise }
+  | { type: 'round'; item: Round }
+  | null
+
 interface PropertiesPanelProps {
-  section: Section | null
-  onUpdateSection: (section: Section) => void
-  onDeleteSection?: () => void
+  selectedItem: SelectedItem
+  onClearSelection: () => void
   onRefreshWorkout?: () => void
 }
 
-type SelectedItem =
-  | { type: 'section'; item: Section }
-  | { type: 'exercise'; item: Exercise; section: Section }
-  | { type: 'round'; item: Round; exercise: Exercise; section: Section }
-  | null
-
 export function PropertiesPanel({
-  section,
-  onUpdateSection,
-  onDeleteSection,
+  selectedItem,
+  onClearSelection,
   onRefreshWorkout
 }: PropertiesPanelProps) {
-  const [selected, setSelected] = useState<SelectedItem>(null)
-
-  useEffect(() => {
-    if (section) {
-      setSelected({ type: 'section', item: section })
-    } else {
-      setSelected(null)
-    }
-  }, [section])
-
-  if (!selected) {
+  if (!selectedItem) {
     return (
       <div className="h-full flex items-center justify-center bg-gray-800 text-gray-400 p-8 text-center">
         Selecione uma seção, exercício ou round para editar
@@ -40,31 +28,31 @@ export function PropertiesPanel({
     )
   }
 
-  if (selected.type === 'section') {
+  if (selectedItem.type === 'section') {
     return (
       <SectionProperties
-        section={selected.item}
-        onUpdate={onUpdateSection}
-        onDelete={onDeleteSection}
-      />
-    )
-  }
-
-  if (selected.type === 'exercise') {
-    return (
-      <ExerciseProperties
-        exercise={selected.item}
-        section={selected.section}
+        section={selectedItem.item}
+        onClearSelection={onClearSelection}
         onRefresh={onRefreshWorkout}
       />
     )
   }
 
-  if (selected.type === 'round') {
+  if (selectedItem.type === 'exercise') {
+    return (
+      <ExerciseProperties
+        exercise={selectedItem.item}
+        onClearSelection={onClearSelection}
+        onRefresh={onRefreshWorkout}
+      />
+    )
+  }
+
+  if (selectedItem.type === 'round') {
     return (
       <RoundProperties
-        round={selected.item}
-        exercise={selected.exercise}
+        round={selectedItem.item}
+        onClearSelection={onClearSelection}
         onRefresh={onRefreshWorkout}
       />
     )
@@ -75,12 +63,12 @@ export function PropertiesPanel({
 
 function SectionProperties({
   section,
-  onUpdate,
-  onDelete
+  onClearSelection,
+  onRefresh
 }: {
   section: Section
-  onUpdate: (s: Section) => void
-  onDelete?: () => void
+  onClearSelection: () => void
+  onRefresh?: () => void
 }) {
   const [name, setName] = useState(section.name)
   const [color, setColor] = useState(section.color || '#FF6B35')
@@ -97,15 +85,13 @@ function SectionProperties({
 
   async function updateSection(updates: Partial<Section>) {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('sections')
         .update(updates)
         .eq('id', section.id)
-        .select()
-        .single()
 
       if (error) throw error
-      if (data) onUpdate(data as any)
+      if (onRefresh) await onRefresh()
     } catch (error) {
       console.error('Error updating section:', error)
     }
@@ -129,10 +115,8 @@ function SectionProperties({
 
       if (error) throw error
 
-      // Notify parent to refresh
-      if (onDelete) {
-        onDelete()
-      }
+      onClearSelection()
+      if (onRefresh) await onRefresh()
     } catch (error) {
       console.error('Error deleting section:', error)
     }
@@ -263,11 +247,11 @@ function SectionProperties({
 
 function ExerciseProperties({
   exercise,
-  section,
+  onClearSelection,
   onRefresh
 }: {
   exercise: Exercise
-  section: Section
+  onClearSelection: () => void
   onRefresh?: () => void
 }) {
   const [name, setName] = useState(exercise.name)
@@ -305,10 +289,8 @@ function ExerciseProperties({
 
       if (error) throw error
 
-      // Notify parent to refresh
-      if (onRefresh) {
-        onRefresh()
-      }
+      onClearSelection()
+      if (onRefresh) await onRefresh()
     } catch (error) {
       console.error('Error deleting exercise:', error)
     }
@@ -320,7 +302,6 @@ function ExerciseProperties({
       <div className="h-full bg-gray-800 flex flex-col">
         <div className="p-6 border-b border-gray-700">
           <h2 className="text-xl font-semibold">Exercício</h2>
-          <p className="text-sm text-gray-400 mt-1">Seção: {section.name}</p>
         </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -367,11 +348,11 @@ function ExerciseProperties({
 
 function RoundProperties({
   round,
-  exercise,
+  onClearSelection,
   onRefresh
 }: {
   round: Round
-  exercise: Exercise
+  onClearSelection: () => void
   onRefresh?: () => void
 }) {
   const [mode, setMode] = useState(round.mode)
@@ -429,10 +410,8 @@ function RoundProperties({
 
       if (error) throw error
 
-      // Notify parent to refresh
-      if (onRefresh) {
-        onRefresh()
-      }
+      onClearSelection()
+      if (onRefresh) await onRefresh()
     } catch (error) {
       console.error('Error deleting round:', error)
     }
@@ -444,7 +423,6 @@ function RoundProperties({
       <div className="h-full bg-gray-800 flex flex-col">
         <div className="p-6 border-b border-gray-700">
           <h2 className="text-xl font-semibold">Round</h2>
-          <p className="text-sm text-gray-400 mt-1">Exercício: {exercise.name}</p>
         </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
