@@ -7,6 +7,8 @@ export interface Workout {
   date: string
   tags: string[] | null
   is_template: boolean
+  is_favorite?: boolean
+  last_executed_at?: string | null
   total_duration: string | null
   created_at: string
   updated_at: string
