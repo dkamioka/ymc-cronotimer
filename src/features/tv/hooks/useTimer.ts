@@ -176,8 +176,20 @@ export function useTimer(workout: Workout | null) {
     }
   }
 
-  // Calculate progress
-  const progress = totalRounds > 0 ? currentFlatIndex / totalRounds : 0
+  // Calculate progress (includes progress within current round)
+  let progress = 0
+  if (totalRounds > 0 && currentFlat) {
+    const roundProgress = currentFlatIndex / totalRounds // Progress through rounds
+
+    // Add progress within current round
+    const duration = parseDuration(currentFlat.round.duration)
+    if (duration > 0) {
+      const withinRoundProgress = Math.min(state.elapsedTime / duration, 1) / totalRounds
+      progress = roundProgress + withinRoundProgress
+    } else {
+      progress = roundProgress
+    }
+  }
 
   // Get next round info
   const nextFlat = flatRounds.current[currentFlatIndex + 1]
