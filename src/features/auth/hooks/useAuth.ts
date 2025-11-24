@@ -6,8 +6,11 @@ export function useAuth() {
   const { user, session, loading, boxId, role, setAuth, setUserProfile, clearAuth } = useAuthStore()
 
   useEffect(() => {
+    console.log('[useAuth] Initializing auth')
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[useAuth] Initial session:', session?.user?.id || 'none')
       setAuth(session?.user ?? null, session)
 
       // If user exists, fetch their profile
@@ -19,7 +22,8 @@ export function useAuth() {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[useAuth] Auth state changed:', event, session?.user?.id || 'none')
       setAuth(session?.user ?? null, session)
 
       if (session?.user) {

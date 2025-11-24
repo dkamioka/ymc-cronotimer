@@ -46,17 +46,26 @@ export function LoginPage() {
     setGoogleLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithOAuth({
+    console.log('[LoginPage] Starting Google OAuth')
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        skipBrowserRedirect: false, // Ensure we redirect, not popup
       },
     })
 
+    console.log('[LoginPage] OAuth response:', { data, error })
+
     if (error) {
+      console.error('[LoginPage] OAuth error:', error)
       setError(error.message)
       setGoogleLoading(false)
     }
+
+    // Note: If redirect is successful, this code won't execute
+    // because the page will navigate away
   }
 
   return (
